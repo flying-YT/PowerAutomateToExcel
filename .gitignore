@@ -1,0 +1,13 @@
+# Claude Code のローカル設定
+.claude/settings.local.json
+
+# エクスポートしたフロー定義（機密情報を含む可能性があるため）
+*.zip
+definition.json
+
+# OS / エディター
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
