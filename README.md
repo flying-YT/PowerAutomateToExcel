@@ -15,6 +15,7 @@ Power Automate のフロー定義（`definition.json`）を Excel のフロー�
   | 条件分岐（False 側） | 赤 `#F4CCCC` |
   | Scope（スコープ） | オレンジ `#FCE4D6` |
   | Foreach / Until（ループ） | グレー `#F2F2F2` |
+- **ループ / 分岐の設定値も出力** — `inputs` を持たない Apply to each（繰り返し対象）、Do until（終了条件・制限）、スイッチ（判定対象）の設定値も補完して出力します
 - **トリガーの詳細も出力** — スケジュールトリガーの `recurrence`（繰り返し設定）や、コネクタの `operationId` も併記します
 - **外部ツール不要** — Excel on the web / デスクトップ版の Office スクリプトだけで完結します
 
@@ -44,7 +45,7 @@ Power Automate のフロー定義（`definition.json`）を Excel のフロー�
 | 階層 / 分岐ルート | `Root > スコープ名 > 条件名 [◯ True]` のような、そのアクションが属する経路 |
 | アクション名（変更後） | フロー上で設定されているアクション名 |
 | 種類 / デフォルト名 | アクションの `type`。コネクタの場合は `operationId` を併記 |
-| 入力パラメーター（inputs/条件など） | `inputs`（または `parameters`）を整形した JSON。条件分岐は `【条件式】`、スケジュールトリガーは `【スケジュール設定】` を先頭に付与 |
+| 入力パラメーター（inputs/条件など） | `inputs`（または `parameters`）を整形した JSON。条件分岐・スイッチ・Do until は `【条件式】`、Apply to each は `【繰り返し対象】`、Do until の上限は `【制限】`、スケジュールトリガーは `【スケジュール設定】` を付与。設定値がない場合は `-` |
 | 実行条件（runAfter） | 直前のアクション名と、その実行結果（`Succeeded` / `Failed` など） |
 
 ## 動作環境

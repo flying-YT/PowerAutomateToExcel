@@ -4,6 +4,8 @@ interface FlowAction {
     inputs?: unknown;
     parameters?: unknown;
     expression?: unknown;
+    foreach?: unknown;
+    limit?: unknown;
     recurrence?: unknown;
     runAfter?: Record<string, string[]>;
     actions?: Record<string, FlowAction>;
@@ -68,6 +70,12 @@ function getOperationId(inputsObj: unknown): string {
     return "";
 }
 
+function formatInputs(value: unknown): string {
+    if (value === undefined || value === null) return "-";
+    if (typeof value === 'object' && Object.keys(value as Record<string, unknown>).length === 0) return "-";
+    return JSON.stringify(value, null, 2);
+}
+
 function main(workbook: ExcelScript.Workbook) {
     const jsonSheet = workbook.getWorksheet("JSON");
     if(!jsonSheet) {
@@ -114,7 +122,7 @@ function main(workbook: ExcelScript.Workbook) {
         if (trigger.recurrence) {
             targetTriggerInputs = { "【スケジュール設定】": trigger.recurrence, ...targetTriggerInputs };
         }
-        const inputs = JSON.stringify(targetTriggerInputs, null, 2);
+        const inputs = formatInputs(targetTriggerInputs);
 
         rows.push([counter.toString(), "Root（トリガー）", tName, displayType, inputs, "-"]);
         rowColors.push("");
@@ -135,11 +143,22 @@ function main(workbook: ExcelScript.Workbook) {
             const opId = getOperationId(action.inputs);
             const displayType = opId ? `${type}\n(${opId})` : type;
 
-            if (type === "If" && action.expression) {
-                targetInputs = { "【条件式】": action.expression, ...targetInputs };
+            // アクション種別ごとに inputs 以外のプロパティへ設定値が入るため、ここで補完する
+            const extras: Record<string, unknown> = {};
+            if ((type === "If" || type === "Switch" || type === "Until") && action.expression !== undefined) {
+                extras["【条件式】"] = action.expression;
+            }
+            if (type === "Foreach" && action.foreach !== undefined) {
+                extras["【繰り返し対象】"] = action.foreach;
+            }
+            if (type === "Until" && action.limit !== undefined) {
+                extras["【制限】"] = action.limit;
+            }
+            if (Object.keys(extras).length > 0) {
+                targetInputs = { ...extras, ...targetInputs };
             }
 
-            const inputsStr = JSON.stringify(targetInputs, null, 2);
+            const inputsStr = formatInputs(targetInputs);
 
             const runAfterObj = action.runAfter || {};
             const runAfterStr = Object.keys(runAfterObj).length > 0 ? Object.keys(runAfterObj).map(k => `${k}\n(${runAfterObj[k].join(", ")})`).join("\n\n") : "（前ステップ実行後）";
